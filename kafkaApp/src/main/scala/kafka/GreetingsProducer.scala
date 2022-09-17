@@ -1,7 +1,9 @@
 package kafka
-import config.kafka.Kafka
+import cats.effect.kernel.Async
 
-case class GreetingsProducer[F[_], V](kafkaConfig: Kafka) extends Producer[F, V] {
-  override def send(message: V): F[Unit] = ???
-
+case class GreetingsProducer[F[_]: Async, V](
+    private val kProducer: KafkaProducerClass[F, V]
+) {
+  def publish(key: String, message: V): F[Unit] =
+    kProducer.send(key, message)
 }
