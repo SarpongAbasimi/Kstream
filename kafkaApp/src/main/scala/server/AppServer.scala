@@ -1,7 +1,7 @@
 package server
 
-import cats.effect.std.Console
-import cats.effect.{Async, Resource}
+import cats.effect.Resource
+import cats.effect.Async
 import config.kafka.AppConfig
 import org.http4s.ember.server.EmberServerBuilder
 import com.comcast.ip4s._
@@ -9,10 +9,13 @@ import kafka.{GreetingsProducer, KafkaProducerClass}
 import org.http4s.server.Server
 import routes.Routes
 import models.Greetings
+import org.typelevel.log4cats.Logger
 
 object AppServer {
-  def resource[F[_]: Async: Console](config: AppConfig): Resource[F, Server] = for {
-    _ <- Resource.eval(Console[F].println(s"Starting server 🚀 with config $config"))
+  def resource[F[_]: Async](
+      config: AppConfig
+  )(implicit logger: Logger[F]): Resource[F, Server] = for {
+    _ <- Resource.eval(logger.info(s"Starting server 🚀 with config $config"))
 
     kafkaProducer: KafkaProducerClass[F, Greetings] =
       KafkaProducerClass[F, Greetings](

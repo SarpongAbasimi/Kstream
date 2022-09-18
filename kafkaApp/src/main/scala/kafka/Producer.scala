@@ -1,6 +1,5 @@
 package kafka
 
-import cats.effect.std.Console
 import cats.effect.Async
 import cats.effect.Resource
 import config.kafka.Kafka
@@ -14,13 +13,15 @@ import fs2.kafka.{
 }
 import io.circe.Encoder
 import cats.implicits._
+import org.typelevel.log4cats.Logger
 
 trait Producer[F[_], V] {
-  def send(key: String, message: V): F[Unit]
+  def send(key: String, message: V): Resource[F, Unit]
 }
 
-case class KafkaProducerClass[F[_]: Async: Console, V](config: Kafka)(implicit
-    encoder: Encoder[V]
+case class KafkaProducerClass[F[_]: Async, V](config: Kafka)(implicit
+    encoder: Encoder[V],
+    logger: Logger[F]
 ) extends Producer[F, V] {
 
   private[kafka] implicit val keySerializer: Serializer[F, String] =
@@ -40,21 +41,17 @@ case class KafkaProducerClass[F[_]: Async: Console, V](config: Kafka)(implicit
       .withBootstrapServers(config.bootstrapServer)
       .withAcks(Acks.One)
 
-  override def send(key: String, message: V): F[Unit] = (for {
-    kafkaProducer <- KafkaProducer.resource[F, String, V](producerSettings)
-    _ <- Resource.pure(
-      kafkaProducer
-        .produce(
-          ProducerRecords.one(
-            ProducerRecord[String, V](config.topic, key, message)
+  override def send(key: String, message: V): Resource[F, Unit] =
+    for {
+      kafkaProducer <- KafkaProducer.resource[F, String, V](producerSettings)
+      _ <- Resource.pure(
+        kafkaProducer
+          .produce(
+            ProducerRecords.one(
+              ProducerRecord[String, V](config.topic, key, message)
+            )
           )
-        )
-        .flatten >>
-        Console[F] //Make this a logger
-          .println(
-            s"" +
-              s"Message published to topic: ${config.topic}"
-          )
-    )
-  } yield ()).use(_ => Async[F].unit)
+          .flatten
+      )
+    } yield ()
 }

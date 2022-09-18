@@ -7,7 +7,9 @@ val root = (project in file(".")).settings(
   libraryDependencies ++= Seq(
     fs2Kafka,
     ciris,
-    catsEffect
+    catsEffect,
+    logBack,
+    slfJ
   ) ++ listOfCirceLibraries ++ listOfHttp4sLibraries,
   Compile / unmanagedResourceDirectories += baseDirectory.value / "resources"
 )
