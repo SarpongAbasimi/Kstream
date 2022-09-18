@@ -27,7 +27,7 @@ object AppServer {
     server <- EmberServerBuilder
       .default[F]
       .withHost(ipv4"0.0.0.0")
-      .withPort(port"8080")
+      .withPort(port"8000")
       .withHttpApp(
         Routes
           .greet[F](greetProducer)

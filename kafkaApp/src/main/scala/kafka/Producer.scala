@@ -8,15 +8,15 @@ import fs2.kafka.{
   KafkaProducer,
   ProducerRecord,
   ProducerRecords,
+  ProducerResult,
   ProducerSettings,
   Serializer
 }
 import io.circe.Encoder
-import cats.implicits._
 import org.typelevel.log4cats.Logger
 
 trait Producer[F[_], V] {
-  def send(key: String, message: V): Resource[F, Unit]
+  def send(key: String, message: V): Resource[F, F[ProducerResult[Unit, String, V]]]
 }
 
 case class KafkaProducerClass[F[_]: Async, V](config: Kafka)(implicit
@@ -41,17 +41,19 @@ case class KafkaProducerClass[F[_]: Async, V](config: Kafka)(implicit
       .withBootstrapServers(config.bootstrapServer)
       .withAcks(Acks.One)
 
-  override def send(key: String, message: V): Resource[F, Unit] =
+  override def send(
+      key: String,
+      message: V
+  ): Resource[F, F[ProducerResult[Unit, String, V]]] =
     for {
       kafkaProducer <- KafkaProducer.resource[F, String, V](producerSettings)
-      _ <- Resource.pure(
+      producerResultF <- Resource.eval(
         kafkaProducer
           .produce(
             ProducerRecords.one(
               ProducerRecord[String, V](config.topic, key, message)
             )
           )
-          .flatten
       )
-    } yield ()
+    } yield producerResultF
 }
