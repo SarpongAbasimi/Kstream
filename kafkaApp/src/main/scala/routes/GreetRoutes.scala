@@ -8,7 +8,7 @@ import org.http4s.circe.jsonOf
 import org.http4s.circe.jsonEncoderOf
 import cats.implicits._
 
-object Routes {
+object GreetRoutes {
   def greet[F[_]: Concurrent](
       greetingsProducer: GreetingsProducer[F, Greetings]
   ): HttpRoutes[F] = {
