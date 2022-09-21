@@ -6,6 +6,6 @@ val root = (project in file("."))
     scalaVersion := "2.13.8",
     version := "0.1",
     libraryDependencies ++= Seq(
-      kafkaStream
-    )
+      kafkaStream,
+    )++ listOfCirceLibraries
   )
