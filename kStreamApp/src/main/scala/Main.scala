@@ -2,7 +2,6 @@ import org.apache.kafka.common.serialization.Serdes
 import org.apache.kafka.streams.KafkaStreams
 import org.apache.kafka.streams.StreamsConfig
 import topology.GreetingsTopology
-
 import java.util.Properties
 
 object Main {
