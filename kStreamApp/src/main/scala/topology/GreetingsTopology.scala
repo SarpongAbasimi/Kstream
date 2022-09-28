@@ -3,7 +3,7 @@ import models.Greetings
 import org.apache.kafka.streams.Topology
 import org.apache.kafka.streams.scala.StreamsBuilder
 import org.apache.kafka.streams.scala.kstream.KStream
-import org.apache.kafka.streams.scala.kstream.Consumed
+import org.apache.kafka.streams.kstream.Consumed
 import serde.CustomSerde
 
 object GreetingsTopology {
@@ -22,7 +22,7 @@ object GreetingsTopology {
       )
 
     kStream.foreach { (k, v) =>
-      println(s"Key is $k and value is $v")
+      println(s"The value is $v")
     }
 
     streamsBuilder.build()
