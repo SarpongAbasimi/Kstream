@@ -1,9 +1,10 @@
 package serde
 
-import io.circe.jawn.decode
+import io.circe.parser.decode
 import io.circe.{Decoder, Encoder}
 import org.apache.kafka.common.serialization.Serde
 import org.apache.kafka.streams.scala.serialization.{Serdes => ScalaSedes}
+import java.nio.charset.StandardCharsets
 
 object CustomSerde {
   def create[T >: Null: Encoder: Decoder]: Serde[T] = {
@@ -15,9 +16,13 @@ object CustomSerde {
         .getBytes
 
     val deserializer: Array[Byte] => Option[T] = bytesArray =>
-      decode[T](bytesArray.toString) match {
-        case Left(_)      => None
-        case Right(value) => Some(value)
+      decode[T](new String(bytesArray, StandardCharsets.UTF_8)) match {
+        case Left(_) =>
+          println("Decoding failed 😞")
+          None
+        case Right(value) =>
+          println("Decoding Success 🚀")
+          Some(value)
       }
     ScalaSedes.fromFn[T](serializer, deserializer)
   }
