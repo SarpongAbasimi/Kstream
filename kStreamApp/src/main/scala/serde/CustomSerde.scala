@@ -18,10 +18,8 @@ object CustomSerde {
     val deserializer: Array[Byte] => Option[T] = bytesArray =>
       decode[T](new String(bytesArray, StandardCharsets.UTF_8)) match {
         case Left(_) =>
-          println("Decoding failed 😞")
           None
         case Right(value) =>
-          println("Decoding Success 🚀")
           Some(value)
       }
     ScalaSedes.fromFn[T](serializer, deserializer)
